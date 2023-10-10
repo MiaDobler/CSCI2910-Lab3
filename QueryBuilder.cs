@@ -110,7 +110,51 @@ namespace QueryBuilderStarter
             return dataList;
         }
 
-        // TODO: Add the Create method
+        // the Create method
+        public void Create<T>(T obj) where T : IClassModel
+        {
+            PropertyInfo[] properties = typeof(T).GetProperties();
+
+            var values = new List<string>();
+            var names = new List<string>();
+            PropertyInfo property;
+
+            for (int i = 1; i < properties.Length; i++)
+            {
+                property = properties[i];
+                if (property.PropertyType == typeof(DateTime))
+                {
+                    values.Add($"\"{((DateTime)property.GetValue(obj)).Year}-{((DateTime)property.GetValue(obj)).Month}-{((DateTime)property.GetValue(obj)).Day}\"");
+                }
+                else if (property.PropertyType == typeof(string))
+                {
+                    values.Add($"\"{property.GetValue(obj).ToString()}\"");
+                }
+                else
+                {
+                    values.Add(property.GetValue(obj).ToString());
+                }
+                names.Add(property.Name);
+            }
+
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < values.Count; i++)
+            {
+                if (i == values.Count - 1)
+                {
+                    sb.Append($"{names[i]} = {values[i]}");
+                }
+                else
+                {
+                    sb.Append($"{names[i]} = {values[i]}, ");
+                }
+            }
+
+            var command = connection.CreateCommand();
+            command.CommandText = $"CREATE {typeof(T).Name} INSERT {sb}";
+            var reader = command.ExecuteNonQuery();
+        }
 
         /// <summary>
         /// Update operation to update a record in the SQLite database
