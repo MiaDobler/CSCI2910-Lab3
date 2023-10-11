@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
+using DatabaseIntegration;
 using System.Reflection;
 using System.Text;
 
@@ -10,8 +11,18 @@ namespace QueryBuilderStarter
 
         public QueryBuilder(string dbPath)
         {
+            //something here is not connecting to the db file/showing up in my solution explorer so I can't test if these are functioning correctly
+            static string root = FileRoot.Root;
+            static string dbPath = root + "\\\data.db";
             connection = new SqliteConnection($"Data Source={ dbPath }");
             connection.Open();
+
+            var readall = ReadAll();
+            foreach (var data in readall)
+            {
+                Console.WriteLine(data);
+            }
+
         }
 
         /// <summary>
@@ -152,7 +163,7 @@ namespace QueryBuilderStarter
             }
 
             var command = connection.CreateCommand();
-            command.CommandText = $"CREATE {typeof(T).Name} INSERT {sb}";
+            command.CommandText = $"CREATE TABLE {typeof(T).Name} INSERT {sb}";
             var reader = command.ExecuteNonQuery();
         }
 
